@@ -15,5 +15,6 @@ Market and technology research is in progress, and this file will be updated wit
 
 ## Working notes
 
+- Licensed under AGPL-3.0 (see `LICENSE`); any new dependency must have an AGPL-3.0-compatible license.
 - iRacing runs on Windows only, so the live in-sim component must run on Windows.
 - Do not add build, test, or run instructions here until the code they describe exists.
