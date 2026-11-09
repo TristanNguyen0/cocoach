@@ -1,0 +1,13 @@
+# build output
+bin/
+obj/
+*.user
+.vs/
+.idea/
+TestResults/
+
+# iRacing telemetry recordings are never committed
+*.ibt
+*.IBT
+samples/ibt/*
+!samples/ibt/README.md

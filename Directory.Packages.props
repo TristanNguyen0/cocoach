@@ -1,0 +1,19 @@
+<Project>
+  <!-- Central package versions. Every package must have an AGPL-3.0-compatible license. -->
+  <PropertyGroup>
+    <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+  </PropertyGroup>
+  <ItemGroup>
+    <!-- Apache-2.0: live iRacing SDK feed and .ibt replay through one client -->
+    <PackageVersion Include="SVappsLAB.iRacingTelemetrySDK" Version="2.6.0" />
+    <!-- MIT: session-info YAML (already a dependency of the SDK) -->
+    <PackageVersion Include="YamlDotNet" Version="18.1.0" />
+    <!-- MIT -->
+    <PackageVersion Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.12" />
+    <PackageVersion Include="Microsoft.Extensions.Logging.Console" Version="10.0.12" />
+    <!-- MIT: WASAPI audio output for the latency tool (Windows runtime only) -->
+    <PackageVersion Include="NAudio.Wasapi" Version="3.3.0" />
+    <!-- Tests: Apache-2.0 (xunit.v3, runs on Microsoft.Testing.Platform) -->
+    <PackageVersion Include="xunit.v3" Version="4.0.3" />
+  </ItemGroup>
+</Project>

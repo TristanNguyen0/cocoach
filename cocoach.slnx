@@ -1,0 +1,9 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/CoCoach.Cli/CoCoach.Cli.csproj" />
+    <Project Path="src/CoCoach.Telemetry/CoCoach.Telemetry.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/CoCoach.Tests/CoCoach.Tests.csproj" />
+  </Folder>
+</Solution>

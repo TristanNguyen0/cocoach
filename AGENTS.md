@@ -5,8 +5,8 @@ It reads live telemetry, gives timed voice cues on braking, throttle, and line w
 
 ## Status
 
-Planning is complete and no code exists yet.
-Do not add build, test, or run instructions here until the code they describe exists.
+Phase 0 (foundations) is in place: a .NET 10 solution with the telemetry ingest library, a CLI, and tests.
+Build, test, and run instructions live in README.md, not here.
 
 ## Product decisions
 
