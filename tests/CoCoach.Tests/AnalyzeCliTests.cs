@@ -123,7 +123,10 @@ public sealed class AnalyzeCliTests : IDisposable
         for (var k = 0; k < Styles.Length; k++)
             Assert.Matches($@"(?m)^  L{SyntheticRun.LapNumber(k)}\s+\d:\d\d\.\d{{3}}\s+[+-]\d\.\d{{3}}", output);
         Assert.Matches(@"(?m)^  L4\s+\d:\d\d\.\d{3}\s+\+0\.000\s+reference", output);
-        Assert.Contains("none: no corners detected", output, StringComparison.Ordinal);
+        Assert.Matches(@"(?m)^optimal:   \d:\d\d\.\d{3}, equals the best lap L4 \(no corner segments to combine\)\r?$", output);
+        Assert.DoesNotContain("best corner segments from", output, StringComparison.Ordinal);
+        Assert.Contains("top time-loss corners: none, no corners detected", output, StringComparison.Ordinal);
+        Assert.DoesNotContain("median over", output, StringComparison.Ordinal);
     }
 
     [Fact]

@@ -119,7 +119,10 @@ internal static class AnalyzeCommand
         sb.AppendLine();
 
         Line($"best lap:  {r.Best.Trace.Id.Display(multi)} {Formatting.LapTime(r.Best.LapTime)}");
-        Line($"optimal:   {Formatting.LapTime(r.Optimal.LapTime)} ({Signed(r.Optimal.LapTime - r.Best.LapTime, "0.000")} s), best corner segments from {string.Join(", ", r.Optimal.Trace.ComposedFrom.Select(l => l.Display(multi)))}");
+        if (map.Corners.Count == 0)
+            Line($"optimal:   {Formatting.LapTime(r.Optimal.LapTime)}, equals the best lap {r.Best.Trace.Id.Display(multi)} (no corner segments to combine)");
+        else
+            Line($"optimal:   {Formatting.LapTime(r.Optimal.LapTime)} ({Signed(r.Optimal.LapTime - r.Best.LapTime, "0.000")} s), best corner segments from {string.Join(", ", r.Optimal.Trace.ComposedFrom.Select(l => l.Display(multi)))}");
         var refName = r.Reference.Kind == ReferenceKind.Optimal ? "optimal composite" : $"best lap {r.Best.Trace.Id.Display(multi)}";
         var iracingOptimal = r.IracingOptimalLapTimes.Where(t => t is not null).Select(t => t!.Value).ToArray();
         if (iracingOptimal.Length > 0)
@@ -151,10 +154,17 @@ internal static class AnalyzeCommand
         sb.AppendLine();
 
         var top = r.CornerLosses.Where(l => l.TimeLost > 0).Take(3).ToArray();
-        var lapsAveraged = r.CornerLosses.Count > 0 ? r.CornerLosses[0].Laps : 0;
-        Line($"top {top.Length} time-loss corners (median over {lapsAveraged} valid laps, reference excluded):");
-        if (top.Length == 0)
-            sb.AppendLine(map.Corners.Count == 0 ? "  none: no corners detected" : "  none: no valid lap besides the reference");
+        if (map.Corners.Count == 0)
+        {
+            sb.AppendLine("top time-loss corners: none, no corners detected");
+        }
+        else
+        {
+            var lapsAveraged = r.CornerLosses.Count > 0 ? r.CornerLosses[0].Laps : 0;
+            Line($"top {top.Length} time-loss corners (median over {lapsAveraged} valid laps, reference excluded):");
+            if (top.Length == 0)
+                sb.AppendLine("  none: no valid lap besides the reference");
+        }
         var rank = 1;
         foreach (var loss in top)
         {
