@@ -482,6 +482,13 @@ internal sealed record SyntheticRun(SyntheticCircuit Circuit, GeneratedLap[] Lap
     /// <summary>iRacing lap number of driven lap <paramref name="k"/> (0-based).</summary>
     public static int LapNumber(int k) => k + 2;
 
+    /// <summary>This run's frames, then <paramref name="next"/>'s, as one recording whose lap numbers restart (a reset).</summary>
+    public IReadOnlyList<TelemetryFrame> FollowedByReset(SyntheticRun next)
+    {
+        var offset = Frames.Count;
+        return [.. Frames, .. next.Frames.Select(f => f with { Index = f.Index + offset, SessionTick = f.SessionTick + offset })];
+    }
+
     public string WriteIbt(string path, int trackId = 999, string config = "Test")
     {
         var rows = Frames.Select(f => SyntheticCircuit.IbtVars.Select(v => Value(f, v.Name)).ToArray()).ToArray();

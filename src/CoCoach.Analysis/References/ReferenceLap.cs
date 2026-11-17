@@ -94,7 +94,7 @@ public static class ReferenceBuilder
 
         var trace = new LapTrace
         {
-            Id = new LapId(-1, "optimal", 0, -1),
+            Id = new LapId(-1, "optimal", 0),
             LapTime = offset,
             Length = first.Length,
             Step = step,

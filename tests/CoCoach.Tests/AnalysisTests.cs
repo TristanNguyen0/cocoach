@@ -385,8 +385,7 @@ public sealed class AnalysisTests
     {
         var before = Circuit.Session([LapStyle.Clean, new() { CornerSpeed = new Dictionary<int, double> { [4] = 0.9 } }]);
         var after = Circuit.Session([new() { Decel = new Dictionary<int, double> { [3] = 13 } }, LapStyle.Clean], startTime: 900);
-        var offset = before.Frames.Count;
-        var frames = before.Frames.Concat(after.Frames.Select(f => f with { Index = f.Index + offset, SessionTick = f.SessionTick + offset }));
+        var frames = before.FollowedByReset(after);
 
         var r = SessionAnalyzer.Analyze([SessionLoader.FromFrames("reset.ibt", frames, Circuit.Facts())], new AnalysisOptions { Reference = ReferenceKind.Best });
 
@@ -394,7 +393,9 @@ public sealed class AnalysisTests
         Assert.Equal(2, r.Laps.Count(l => l.Id.Lap == SyntheticRun.LapNumber(0)));
         Assert.Equal(4, r.Laps.Select(l => l.Id).Distinct().Count());
         Assert.Equal(SyntheticRun.LapNumber(0), r.Best.Trace.Id.Lap);
-        Assert.True(r.Best.Trace.Id.FirstFrame >= offset);
+        Assert.Equal(2, r.Best.Trace.Id.Ordinal);
+        Assert.Equal(["L2", "L3", "L2#2", "L3#2"], r.Laps.Select(l => l.Id.Display(multipleSessions: false)));
+        Assert.Equal("S1 L2#2", r.Best.Trace.Id.Display(multipleSessions: true));
         Assert.Single(r.LapAnalyses, a => a.Trace.Id == r.Reference.Trace.Id);
         Assert.All(r.CornerLosses, l => Assert.Equal(3, l.Laps));
         Assert.True(r.Optimal.LapTime <= r.Best.LapTime + 1e-9);

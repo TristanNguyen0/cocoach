@@ -61,18 +61,22 @@ public static class LapTraceBuilder
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(step);
 
         var traces = new List<LapTrace>();
+        var seen = new Dictionary<int, int>();
         foreach (var lap in session.Laps)
         {
             if (!lap.IsComplete || lap.StartTime is null || lap.LapTime is null || lap.FirstFrameIndex < 0)
                 continue;
-            var trace = BuildLap(session, sessionIndex, lap, trackLength, step);
-            if (trace is not null)
-                traces.Add(trace);
+            var ordinal = seen.GetValueOrDefault(lap.Lap) + 1;
+            var trace = BuildLap(session, new LapId(sessionIndex, session.Label, lap.Lap, ordinal), lap, trackLength, step);
+            if (trace is null)
+                continue;
+            seen[lap.Lap] = ordinal;
+            traces.Add(trace);
         }
         return traces;
     }
 
-    static LapTrace? BuildLap(RecordedSession session, int sessionIndex, LapSummary lap, double length, double step)
+    static LapTrace? BuildLap(RecordedSession session, LapId id, LapSummary lap, double length, double step)
     {
         // distance along the lap, unwrapped: the frame before the line is just below 0, the one after just above length
         var samples = new List<(double U, TelemetryFrame F)>();
@@ -119,7 +123,7 @@ public static class LapTraceBuilder
 
         return new LapTrace
         {
-            Id = new LapId(sessionIndex, session.Label, lap.Lap, lap.FirstFrameIndex),
+            Id = id,
             LapTime = lapTime,
             ReportedLapTime = lap.ReportedLapTime,
             IracingBestLapTime = IracingBest(samples, length),

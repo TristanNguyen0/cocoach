@@ -2,6 +2,7 @@ using System.Text.Json;
 using CoCoach.Analysis;
 using CoCoach.Analysis.Corners;
 using CoCoach.Analysis.Recording;
+using CoCoach.Analysis.References;
 using CoCoach.Cli;
 using CoCoach.Cli.Commands;
 using CoCoach.Tests.Support;
@@ -127,6 +128,31 @@ public sealed class AnalyzeCliTests : IDisposable
         Assert.DoesNotContain("best corner segments from", output, StringComparison.Ordinal);
         Assert.Contains("top time-loss corners: none, no corners detected", output, StringComparison.Ordinal);
         Assert.DoesNotContain("median over", output, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void Analyze_json_tells_apart_laps_whose_number_repeats_after_a_reset()
+    {
+        var before = Circuit.Session([LapStyle.Clean, Styles[1]]);
+        var after = Circuit.Session([Styles[2], LapStyle.Clean], startTime: 900);
+        var session = SessionLoader.FromFrames("reset.ibt", before.FollowedByReset(after), Circuit.Facts());
+        var result = SessionAnalyzer.Analyze([session], new AnalysisOptions { Reference = ReferenceKind.Optimal });
+
+        using var doc = JsonDocument.Parse(AnalyzeCommand.ToJson(result));
+        var root = doc.RootElement;
+
+        var laps = root.GetProperty("laps").EnumerateArray()
+            .Select(l => (Label: l.GetProperty("lap").GetString()!, Number: l.GetProperty("lapNumber").GetInt32(), Ordinal: l.GetProperty("ordinal").GetInt32()))
+            .ToArray();
+        Assert.Equal([("L2", 2, 1), ("L3", 3, 1), ("L2#2", 2, 2), ("L3#2", 3, 2)], laps);
+        var labels = laps.Select(l => l.Label).ToHashSet();
+        Assert.Equal("L2#2", root.GetProperty("best").GetProperty("lap").GetString());
+        Assert.All(root.GetProperty("optimal").GetProperty("segments").EnumerateArray(), s => Assert.Contains(s.GetProperty("lap").GetString()!, labels));
+        Assert.All(root.GetProperty("iracingDeltaCheck").EnumerateArray(), c =>
+        {
+            Assert.Contains(c.GetProperty("lap").GetString()!, labels);
+            Assert.Contains(c.GetProperty("reference").GetString()!, labels);
+        });
     }
 
     [Fact]

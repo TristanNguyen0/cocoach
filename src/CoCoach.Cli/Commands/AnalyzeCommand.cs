@@ -277,6 +277,7 @@ internal static class AnalyzeCommand
                 lap = Id(a.Trace.Id),
                 session = a.Trace.Id.Session + 1,
                 lapNumber = a.Trace.Id.Lap,
+                ordinal = a.Trace.Id.Ordinal,
                 lapTime = R(a.Trace.LapTime),
                 iracingLapTime = RO(a.Trace.ReportedLapTime),
                 valid = a.Trace.IsValid,
