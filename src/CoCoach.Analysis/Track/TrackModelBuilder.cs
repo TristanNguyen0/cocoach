@@ -19,7 +19,7 @@ public static class TrackModelBuilder
 
     /// <summary>
     /// Builds the model. <paramref name="cleanLaps"/> are averaged into the centreline;
-    /// <paramref name="allLaps"/> (every complete lap, off-track ones included) feed the edge estimate.
+    /// <paramref name="allLaps"/> (every complete lap, off-track ones included, pit-road ones ignored) feed the edge estimate.
     /// </summary>
     /// <exception cref="InvalidOperationException">No lap carries GPS or yaw rate, so no map can be built.</exception>
     public static TrackModel Build(TrackKey key, IReadOnlyList<LapTrace> cleanLaps, IReadOnlyList<LapTrace>? allLaps = null, int? expectedTurns = null)
@@ -154,7 +154,7 @@ public static class TrackModelBuilder
         var offLeft = Filled(n, double.PositiveInfinity);
         var offRight = Filled(n, double.NegativeInfinity);
 
-        foreach (var lap in laps)
+        foreach (var lap in laps.Where(l => !l.PitRoad))
         {
             if (model.LateralOffsets(lap) is not { } offsets)
                 continue;

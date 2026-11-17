@@ -248,6 +248,50 @@ public sealed class AnalysisTests
     }
 
     [Fact]
+    public void Pit_lane_positions_do_not_widen_the_track_edges()
+    {
+        // the third lap starts from a pit lane 20 m right of the main straight, which heads east
+        var run = Circuit.Session([LapStyle.Clean, LapStyle.Clean, LapStyle.Clean]);
+        var pitLap = SyntheticRun.LapNumber(2);
+        var frames = run.Frames.Select(f =>
+        {
+            if (f.Lap != pitLap || f.LapDist >= 150 || f.Lat is not { } lat || f.Lon is not { } lon)
+                return f;
+            var (east, north, up) = Geodesy.ToEnu(SyntheticCircuit.Origin, lat, lon, f.Alt ?? 0);
+            var (pitLat, pitLon, _) = Geodesy.FromEnu(SyntheticCircuit.Origin, east, north - 20, up);
+            return f with { Lat = pitLat, Lon = pitLon, OnPitRoad = true, PlayerTrackSurface = 2 };
+        });
+        var r = SessionAnalyzer.Analyze([SessionLoader.FromFrames("pit.ibt", frames, Circuit.Facts())]);
+
+        Assert.True(r.Laps.Single(l => l.Id.Lap == pitLap).PitRoad);
+        for (var i = 0; i < 150; i++)
+        {
+            Assert.Equal(TrackModelBuilder.HalfCarWidth, r.Track.LeftEdge![i], 0.2);
+            Assert.Equal(-TrackModelBuilder.HalfCarWidth, r.Track.RightEdge![i], 0.2);
+        }
+    }
+
+    [Fact]
+    public void A_lapdistpct_just_below_zero_after_the_line_keeps_the_lap_and_its_tracker_time()
+    {
+        var run = Circuit.Session([LapStyle.Clean, LapStyle.Clean, LapStyle.Clean]);
+        var frames = run.Frames.ToArray();
+        for (var k = 1; k < frames.Length; k++)
+        {
+            if (frames[k].Lap != frames[k - 1].Lap)
+                frames[k] = frames[k] with { LapDistPct = -0.0002f, LapDist = (float)(-0.0002 * Circuit.Length) };
+        }
+        var session = SessionLoader.FromFrames("negative.ibt", frames, Circuit.Facts());
+        var r = SessionAnalyzer.Analyze([session]);
+
+        var complete = session.Laps.Where(l => l.IsComplete).ToArray();
+        Assert.Equal(3, complete.Length);
+        Assert.Equal(complete.Select(l => l.Lap), r.Laps.Select(l => l.Id.Lap));
+        foreach (var lap in complete)
+            Assert.Equal(lap.LapTime!.Value, r.Laps.Single(l => l.Id.Lap == lap.Lap).LapTime, 1e-6);
+    }
+
+    [Fact]
     public void Optimal_composite_takes_the_best_segment_from_each_lap()
     {
         // one lap fast in corner 3, another fast in corner 4: the composite beats both

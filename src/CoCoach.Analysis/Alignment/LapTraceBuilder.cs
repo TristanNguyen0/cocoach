@@ -82,8 +82,8 @@ public static class LapTraceBuilder
             if (f.SessionTime is null)
                 continue;
             var wrap = f.Index < lap.FirstFrameIndex ? -1 : f.Index > lap.LastFrameIndex ? 1 : 0;
-            double? u = f.LapDistPct is { } pct ? (pct + wrap) * length
-                : f.LapDist is { } dist ? dist + wrap * length
+            double? u = f.LapDistPct is { } pct ? (Math.Max(0.0, pct) + wrap) * length
+                : f.LapDist is { } dist ? Math.Max(0.0, dist) + wrap * length
                 : null;
             if (u is null)
                 continue;

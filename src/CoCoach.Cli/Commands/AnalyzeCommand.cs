@@ -95,7 +95,7 @@ internal static class AnalyzeCommand
 
         var map = r.Track;
         var mapText = map.Source == TrackMapSource.Gps
-            ? $"GPS centreline averaged from {map.LapsUsed} clean laps, edges estimated from {r.Laps.Count} laps"
+            ? $"GPS centreline averaged from {map.LapsUsed} clean laps, edges estimated from {r.Laps.Count(l => !l.PitRoad)} laps off pit road"
             : $"no GPS: dead-reckoned from speed and yaw rate over {map.LapsUsed} laps, loop-closure error {map.ClosureError:0.0} m before correction";
         Line($"track map: {map.Length:0.0} m, {mapText}");
 
