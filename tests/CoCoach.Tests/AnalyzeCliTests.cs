@@ -1,5 +1,9 @@
 using System.Text.Json;
+using CoCoach.Analysis;
+using CoCoach.Analysis.Corners;
+using CoCoach.Analysis.Recording;
 using CoCoach.Cli;
+using CoCoach.Cli.Commands;
 using CoCoach.Tests.Support;
 
 namespace CoCoach.Tests;
@@ -102,6 +106,24 @@ public sealed class AnalyzeCliTests : IDisposable
         Assert.Equal(2, (await Run("analyze")).Code);
         Assert.Equal(2, (await Run("analyze", "x.ibt", "--reference", "fastest")).Code);
         Assert.Equal(2, (await Run("analyze", "x.ibt", "--bogus")).Code);
+    }
+
+    [Fact]
+    public async Task Analyze_text_lists_every_lap_and_says_so_when_no_corner_is_detected()
+    {
+        var session = await SessionLoader.LoadIbtAsync(Ibt("oval.ibt"), cancellationToken: TestContext.Current.CancellationToken);
+        var options = new AnalysisOptions { Corners = new CornerDetectionOptions { EnterCurvature = 1 } };
+        var result = SessionAnalyzer.Analyze([session], options);
+
+        var output = AnalyzeCommand.ToText(result);
+
+        Assert.Empty(result.Track.Corners);
+        Assert.Contains("corners: 0 found", output, StringComparison.Ordinal);
+        Assert.Contains("no corners detected, so there are no per-corner metrics (large-radius oval turns are not detected yet)", output, StringComparison.Ordinal);
+        for (var k = 0; k < Styles.Length; k++)
+            Assert.Matches($@"(?m)^  L{SyntheticRun.LapNumber(k)}\s+\d:\d\d\.\d{{3}}\s+[+-]\d\.\d{{3}}", output);
+        Assert.Matches(@"(?m)^  L4\s+\d:\d\d\.\d{3}\s+\+0\.000\s+reference", output);
+        Assert.Contains("none: no corners detected", output, StringComparison.Ordinal);
     }
 
     [Fact]

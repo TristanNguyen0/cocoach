@@ -34,8 +34,6 @@ public static class TelemetryFrameReader
             PlayerTrackSurface = AsInt(lookup(TelemetryVars.PlayerTrackSurface)),
             PlayerTrackSurfaceMaterial = AsInt(lookup(TelemetryVars.PlayerTrackSurfaceMaterial)),
             YawRate = AsFloat(lookup(TelemetryVars.YawRate)),
-            LatAccel = AsFloat(lookup(TelemetryVars.LatAccel)),
-            LongAccel = AsFloat(lookup(TelemetryVars.LongAccel)),
             Lat = AsDouble(lookup(TelemetryVars.Lat)),
             Lon = AsDouble(lookup(TelemetryVars.Lon)),
             Alt = AsFloat(lookup(TelemetryVars.Alt)),

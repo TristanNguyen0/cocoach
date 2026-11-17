@@ -104,14 +104,11 @@ public static class ReferenceBuilder
             Brake = channels.Brake,
             Steering = channels.Steering,
             YawRate = channels.YawRate,
-            LongAccel = channels.LongAccel,
-            LatAccel = channels.LatAccel,
             Lat = channels.Lat,
             Lon = channels.Lon,
             Alt = channels.Alt,
             TrackSurface = channels.TrackSurface,
             SurfaceMaterial = channels.SurfaceMaterial,
-            Gear = channels.Gear,
             ComposedFrom = choices.Select(c => c.Lap).Distinct().ToArray(),
         };
         return new ReferenceLap(ReferenceKind.Optimal, trace, choices);
@@ -127,14 +124,11 @@ public static class ReferenceBuilder
         public double[]? Brake { get; } = Make(n, laps, l => l.Brake);
         public double[]? Steering { get; } = Make(n, laps, l => l.Steering);
         public double[]? YawRate { get; } = Make(n, laps, l => l.YawRate);
-        public double[]? LongAccel { get; } = Make(n, laps, l => l.LongAccel);
-        public double[]? LatAccel { get; } = Make(n, laps, l => l.LatAccel);
         public double[]? Lat { get; } = Make(n, laps, l => l.Lat);
         public double[]? Lon { get; } = Make(n, laps, l => l.Lon);
         public double[]? Alt { get; } = Make(n, laps, l => l.Alt);
         public double[]? TrackSurface { get; } = Make(n, laps, l => l.TrackSurface);
         public double[]? SurfaceMaterial { get; } = Make(n, laps, l => l.SurfaceMaterial);
-        public double[]? Gear { get; } = Make(n, laps, l => l.Gear);
 
         static double[]? Make(int n, IReadOnlyList<LapTrace> laps, Func<LapTrace, double[]?> channel) =>
             laps.All(l => channel(l) is not null) ? new double[n] : null;
@@ -146,14 +140,11 @@ public static class ReferenceBuilder
             Set(Brake, lap.Brake, i);
             Set(Steering, lap.Steering, i);
             Set(YawRate, lap.YawRate, i);
-            Set(LongAccel, lap.LongAccel, i);
-            Set(LatAccel, lap.LatAccel, i);
             Set(Lat, lap.Lat, i);
             Set(Lon, lap.Lon, i);
             Set(Alt, lap.Alt, i);
             Set(TrackSurface, lap.TrackSurface, i);
             Set(SurfaceMaterial, lap.SurfaceMaterial, i);
-            Set(Gear, lap.Gear, i);
         }
 
         static void Set(double[]? target, double[]? source, int i)

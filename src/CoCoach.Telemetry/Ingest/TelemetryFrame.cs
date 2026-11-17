@@ -73,12 +73,6 @@ public sealed record TelemetryFrame
     /// <summary>Yaw rate, radians per second (positive turns left).</summary>
     public float? YawRate { get; init; }
 
-    /// <summary>Lateral acceleration, metres per second squared (includes gravity).</summary>
-    public float? LatAccel { get; init; }
-
-    /// <summary>Longitudinal acceleration, metres per second squared (includes gravity).</summary>
-    public float? LongAccel { get; init; }
-
     /// <summary>Latitude, degrees. Recorded in .ibt files only; reads as zero or absent on the live feed.</summary>
     public double? Lat { get; init; }
 

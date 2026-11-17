@@ -20,7 +20,7 @@ public sealed record LapId(int Session, string SessionLabel, int Lap)
 /// </summary>
 /// <remarks>
 /// Continuous channels are linearly interpolated between the two frames either side of a grid point;
-/// discrete channels (surface, material, gear, delta-OK flags) take the earlier frame's value.
+/// discrete channels (surface, material, delta-OK flags) take the earlier frame's value.
 /// A channel the source does not carry is <see langword="null"/>; a missing value inside a carried
 /// channel is NaN.
 /// </remarks>
@@ -60,9 +60,6 @@ public sealed class LapTrace
     /// <summary>Yaw rate, rad/s (positive = left).</summary>
     public double[]? YawRate { get; init; }
 
-    public double[]? LongAccel { get; init; }
-    public double[]? LatAccel { get; init; }
-
     /// <summary>GPS latitude and longitude, degrees; NaN where the recording has no fix.</summary>
     public double[]? Lat { get; init; }
 
@@ -74,8 +71,6 @@ public sealed class LapTrace
 
     /// <summary><c>irsdk_TrkSurf</c> per grid point (11-14 = kerbs).</summary>
     public double[]? SurfaceMaterial { get; init; }
-
-    public double[]? Gear { get; init; }
 
     /// <summary>iRacing's <c>LapDeltaToBestLap</c>, NaN where its <c>_OK</c> flag was false.</summary>
     public double[]? IracingDeltaToBest { get; init; }

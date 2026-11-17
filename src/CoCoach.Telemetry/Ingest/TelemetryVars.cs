@@ -25,8 +25,6 @@ public static class TelemetryVars
     public const string PlayerTrackSurface = nameof(PlayerTrackSurface);
     public const string PlayerTrackSurfaceMaterial = nameof(PlayerTrackSurfaceMaterial);
     public const string YawRate = nameof(YawRate);
-    public const string LatAccel = nameof(LatAccel);
-    public const string LongAccel = nameof(LongAccel);
     public const string Lat = nameof(Lat);
     public const string Lon = nameof(Lon);
     public const string Alt = nameof(Alt);
@@ -40,7 +38,7 @@ public static class TelemetryVars
     [
         SessionTime, SessionTick, Lap, LapCompleted, LapDist, LapDistPct, LapCurrentLapTime,
         LapLastLapTime, LapBestLapTime, Speed, Throttle, Brake, SteeringWheelAngle, Gear, IsOnTrack, OnPitRoad,
-        PlayerTrackSurface, PlayerTrackSurfaceMaterial, YawRate, LatAccel, LongAccel, Lat, Lon, Alt,
+        PlayerTrackSurface, PlayerTrackSurfaceMaterial, YawRate, Lat, Lon, Alt,
         LapDeltaToBestLap, LapDeltaToBestLapOk, LapDeltaToOptimalLap, LapDeltaToOptimalLapOk,
     ];
 }

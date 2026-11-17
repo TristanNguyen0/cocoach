@@ -105,10 +105,17 @@ internal static class AnalyzeCommand
             : "iRacing turn count not in the recording";
         Line($"corners: {count.Found} found ({expected})");
         sb.AppendLine();
-        sb.AppendLine("  corner  dir     start  turn-in    apex    exit     end   turn   min R");
-        foreach (var c in map.Corners)
-            Line($"  {c.Name,-6}  {(c.Direction == CornerDirection.Left ? "left" : "right"),-5}  {c.Start,6:0}  {c.TurnIn,7:0}  {c.Apex,6:0}  {c.Exit,6:0}  {c.End,6:0}  {c.HeadingChange,4:0}°  {c.MinRadius,4:0} m");
-        sb.AppendLine("  (positions are metres from the start/finish line)");
+        if (map.Corners.Count == 0)
+        {
+            sb.AppendLine("  no corners detected, so there are no per-corner metrics (large-radius oval turns are not detected yet)");
+        }
+        else
+        {
+            sb.AppendLine("  corner  dir     start  turn-in    apex    exit     end   turn   min R");
+            foreach (var c in map.Corners)
+                Line($"  {c.Name,-6}  {(c.Direction == CornerDirection.Left ? "left" : "right"),-5}  {c.Start,6:0}  {c.TurnIn,7:0}  {c.Apex,6:0}  {c.Exit,6:0}  {c.End,6:0}  {c.HeadingChange,4:0}°  {c.MinRadius,4:0} m");
+            sb.AppendLine("  (positions are metres from the start/finish line)");
+        }
         sb.AppendLine();
 
         Line($"best lap:  {r.Best.Trace.Id.Display(multi)} {Formatting.LapTime(r.Best.LapTime)}");
@@ -128,17 +135,15 @@ internal static class AnalyzeCommand
         sb.AppendLine("  lap     lap time     delta  corner   Δtime  Δentry    Δmid   Δexit  brake m  Δentry v  Δmin v  Δexit v  apex m  pickup m  kerb m  line m  note");
         foreach (var lap in r.LapAnalyses)
         {
-            var first = true;
+            var head = string.Create(Inv, $"  {lap.Trace.Id.Display(multi),-6} {Formatting.LapTime(lap.Trace.LapTime),9}  {Signed(lap.LapTimeDelta(r.Reference), "0.000"),8}");
+            var isReference = lap.Trace.Id == r.Reference.Trace.Id;
+            if (lap.Corners.Count == 0)
+                Line($"{head}  {(isReference ? "reference" : lap.Trace.OffTrack ? "off track" : string.Empty)}");
             foreach (var c in lap.Corners)
             {
-                var head = first
-                    ? string.Create(Inv, $"  {lap.Trace.Id.Display(multi),-6} {Formatting.LapTime(lap.Trace.LapTime),9}  {Signed(lap.LapTimeDelta(r.Reference), "0.000"),8}")
-                    : new string(' ', 2 + 6 + 1 + 9 + 2 + 8);
-                first = false;
-                var note = c.Lap.OffTrack ? "off track" : string.Empty;
-                if (lap.Trace.Id == r.Reference.Trace.Id)
-                    note = "reference";
+                var note = isReference ? "reference" : c.Lap.OffTrack ? "off track" : string.Empty;
                 Line($"{head}  {c.Corner.Name,-6} {Signed(c.TimeDelta, "0.00"),6}  {Signed(c.EntryDelta, "0.00"),6}  {Signed(c.MidDelta, "0.00"),6}  {Signed(c.ExitDelta, "0.00"),6}  {Opt(c.BrakePointOffset, "0"),7}  {Signed(c.EntrySpeedDifference * 3.6, "0.0"),8}  {Signed(c.MinSpeedDifference * 3.6, "0.0"),6}  {Signed(c.ExitSpeedDifference * 3.6, "0.0"),7}  {Signed(c.ApexOffset, "0"),6}  {Opt(c.ThrottlePickupOffset, "0"),8}  {Kerb(c.Lap.KerbMetres),6}  {Opt(c.ApexLineOffset, "0.0"),6}  {note}");
+                head = new string(' ', 2 + 6 + 1 + 9 + 2 + 8);
             }
             if (!lap.Trace.IsValid)
                 sb.AppendLine("         (lap not valid: off track or pit road; not used for references)");
@@ -149,7 +154,7 @@ internal static class AnalyzeCommand
         var lapsAveraged = r.CornerLosses.Count > 0 ? r.CornerLosses[0].Laps : 0;
         Line($"top {top.Length} time-loss corners (median over {lapsAveraged} valid laps, reference excluded):");
         if (top.Length == 0)
-            sb.AppendLine("  none: no valid lap besides the reference");
+            sb.AppendLine(map.Corners.Count == 0 ? "  none: no corners detected" : "  none: no valid lap besides the reference");
         var rank = 1;
         foreach (var loss in top)
         {

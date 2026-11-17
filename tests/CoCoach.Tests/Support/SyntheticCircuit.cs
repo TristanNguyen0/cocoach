@@ -405,8 +405,6 @@ internal sealed class SyntheticCircuit
             PlayerTrackSurface = offTrack ? 0 : 3,
             PlayerTrackSurfaceMaterial = kerb ? SurfaceMaterials.FirstRumble : offTrack ? SurfaceMaterials.FirstOffTrack : 1,
             YawRate = (float)(speed * _k[i]),
-            LatAccel = (float)(speed * speed * _k[i]),
-            LongAccel = 0,
             Lat = gps ? lat : null,
             Lon = gps ? lon : null,
             Alt = gps ? (float)alt : null,
