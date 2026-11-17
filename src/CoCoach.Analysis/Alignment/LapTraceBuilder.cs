@@ -119,7 +119,7 @@ public static class LapTraceBuilder
 
         return new LapTrace
         {
-            Id = new LapId(sessionIndex, session.Label, lap.Lap),
+            Id = new LapId(sessionIndex, session.Label, lap.Lap, lap.FirstFrameIndex),
             LapTime = lapTime,
             ReportedLapTime = lap.ReportedLapTime,
             IracingBestLapTime = IracingBest(samples, length),

@@ -1,10 +1,14 @@
 namespace CoCoach.Analysis.Alignment;
 
-/// <summary>Identifies one lap: which loaded session it came from and iRacing's lap number in it.</summary>
+/// <summary>Identifies one lap: which loaded session it came from, iRacing's lap number in it, and where it starts.</summary>
 /// <param name="Session">Zero-based position of the session in the analysed set.</param>
 /// <param name="SessionLabel">The session's label (its file name).</param>
 /// <param name="Lap">iRacing's lap number.</param>
-public sealed record LapId(int Session, string SessionLabel, int Lap)
+/// <param name="FirstFrame">
+/// Index of the lap's first frame in its session. iRacing's lap number repeats after a reset or a new session
+/// in the same recording; the first frame does not.
+/// </param>
+public sealed record LapId(int Session, string SessionLabel, int Lap, long FirstFrame)
 {
     /// <summary>"L6", or "S2 L6" when several sessions are analysed together.</summary>
     public string Display(bool multipleSessions) =>

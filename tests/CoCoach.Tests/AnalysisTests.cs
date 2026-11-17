@@ -375,8 +375,28 @@ public sealed class AnalysisTests
 
         Assert.True(r.MultipleSessions);
         Assert.Equal(3, r.Laps.Count);
-        Assert.Equal(new LapId(1, "tuesday.ibt", 2), r.Best.Trace.Id);
+        Assert.Equal((1, "tuesday.ibt", 2), (r.Best.Trace.Id.Session, r.Best.Trace.Id.SessionLabel, r.Best.Trace.Id.Lap));
         Assert.Equal("S2 L2", r.Best.Trace.Id.Display(multipleSessions: true));
+        Assert.True(r.Optimal.LapTime <= r.Best.LapTime + 1e-9);
+    }
+
+    [Fact]
+    public void Laps_whose_number_repeats_after_a_reset_stay_distinct()
+    {
+        var before = Circuit.Session([LapStyle.Clean, new() { CornerSpeed = new Dictionary<int, double> { [4] = 0.9 } }]);
+        var after = Circuit.Session([new() { Decel = new Dictionary<int, double> { [3] = 13 } }, LapStyle.Clean], startTime: 900);
+        var offset = before.Frames.Count;
+        var frames = before.Frames.Concat(after.Frames.Select(f => f with { Index = f.Index + offset, SessionTick = f.SessionTick + offset }));
+
+        var r = SessionAnalyzer.Analyze([SessionLoader.FromFrames("reset.ibt", frames, Circuit.Facts())], new AnalysisOptions { Reference = ReferenceKind.Best });
+
+        Assert.Equal(4, r.Laps.Count);
+        Assert.Equal(2, r.Laps.Count(l => l.Id.Lap == SyntheticRun.LapNumber(0)));
+        Assert.Equal(4, r.Laps.Select(l => l.Id).Distinct().Count());
+        Assert.Equal(SyntheticRun.LapNumber(0), r.Best.Trace.Id.Lap);
+        Assert.True(r.Best.Trace.Id.FirstFrame >= offset);
+        Assert.Single(r.LapAnalyses, a => a.Trace.Id == r.Reference.Trace.Id);
+        Assert.All(r.CornerLosses, l => Assert.Equal(3, l.Laps));
         Assert.True(r.Optimal.LapTime <= r.Best.LapTime + 1e-9);
     }
 
