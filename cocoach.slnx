@@ -1,5 +1,6 @@
 <Solution>
   <Folder Name="/src/">
+    <Project Path="src/CoCoach.Analysis/CoCoach.Analysis.csproj" />
     <Project Path="src/CoCoach.Cli/CoCoach.Cli.csproj" />
     <Project Path="src/CoCoach.Telemetry/CoCoach.Telemetry.csproj" />
   </Folder>

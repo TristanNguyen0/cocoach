@@ -36,6 +36,7 @@ public static partial class SessionInfoParser
             TrackName = Scalar(weekend, "TrackName"),
             TrackId = ParseInt(Scalar(weekend, "TrackID")),
             TrackLength = Scalar(weekend, "TrackLength"),
+            TrackNumTurns = ParseInt(Scalar(weekend, "TrackNumTurns")),
             TrackCity = Scalar(weekend, "TrackCity"),
             TrackCountry = Scalar(weekend, "TrackCountry"),
             EventType = Scalar(weekend, "EventType"),

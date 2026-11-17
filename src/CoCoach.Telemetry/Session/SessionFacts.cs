@@ -15,6 +15,9 @@ public sealed record SessionFacts
     /// <summary>As iRacing writes it, for example "5.79 km".</summary>
     public string? TrackLength { get; init; }
 
+    /// <summary>WeekendInfo.TrackNumTurns: iRacing's official corner count, a sanity check for corner detection.</summary>
+    public int? TrackNumTurns { get; init; }
+
     public string? TrackCity { get; init; }
     public string? TrackCountry { get; init; }
 

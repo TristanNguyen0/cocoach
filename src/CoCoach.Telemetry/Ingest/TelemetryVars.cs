@@ -14,6 +14,7 @@ public static class TelemetryVars
     public const string LapDistPct = nameof(LapDistPct);
     public const string LapCurrentLapTime = nameof(LapCurrentLapTime);
     public const string LapLastLapTime = nameof(LapLastLapTime);
+    public const string LapBestLapTime = nameof(LapBestLapTime);
     public const string Speed = nameof(Speed);
     public const string Throttle = nameof(Throttle);
     public const string Brake = nameof(Brake);
@@ -23,12 +24,23 @@ public static class TelemetryVars
     public const string OnPitRoad = nameof(OnPitRoad);
     public const string PlayerTrackSurface = nameof(PlayerTrackSurface);
     public const string PlayerTrackSurfaceMaterial = nameof(PlayerTrackSurfaceMaterial);
+    public const string YawRate = nameof(YawRate);
+    public const string LatAccel = nameof(LatAccel);
+    public const string LongAccel = nameof(LongAccel);
+    public const string Lat = nameof(Lat);
+    public const string Lon = nameof(Lon);
+    public const string Alt = nameof(Alt);
+    public const string LapDeltaToBestLap = nameof(LapDeltaToBestLap);
+    public const string LapDeltaToBestLapOk = "LapDeltaToBestLap_OK";
+    public const string LapDeltaToOptimalLap = nameof(LapDeltaToOptimalLap);
+    public const string LapDeltaToOptimalLapOk = "LapDeltaToOptimalLap_OK";
 
     /// <summary>Every variable a <see cref="TelemetryFrame"/> carries.</summary>
     public static IReadOnlyList<string> FrameVariables { get; } =
     [
         SessionTime, SessionTick, Lap, LapCompleted, LapDist, LapDistPct, LapCurrentLapTime,
-        LapLastLapTime, Speed, Throttle, Brake, SteeringWheelAngle, Gear, IsOnTrack, OnPitRoad,
-        PlayerTrackSurface, PlayerTrackSurfaceMaterial,
+        LapLastLapTime, LapBestLapTime, Speed, Throttle, Brake, SteeringWheelAngle, Gear, IsOnTrack, OnPitRoad,
+        PlayerTrackSurface, PlayerTrackSurfaceMaterial, YawRate, LatAccel, LongAccel, Lat, Lon, Alt,
+        LapDeltaToBestLap, LapDeltaToBestLapOk, LapDeltaToOptimalLap, LapDeltaToOptimalLapOk,
     ];
 }

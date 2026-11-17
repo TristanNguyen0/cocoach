@@ -26,7 +26,20 @@ public sealed record LapSummary(
     float? MaxSpeed,
     int Frames,
     bool IsComplete,
-    bool PitRoad);
+    bool PitRoad)
+{
+    /// <summary>
+    /// Session time of the start/finish crossing that started this lap, interpolated between ticks.
+    /// <see langword="null"/> when the crossing was not seen as a genuine line crossing.
+    /// </summary>
+    public double? StartTime { get; init; }
+
+    /// <summary><see cref="TelemetryFrame.Index"/> of the first on-track frame counted for this lap.</summary>
+    public long FirstFrameIndex { get; init; } = -1;
+
+    /// <summary><see cref="TelemetryFrame.Index"/> of the last on-track frame counted for this lap.</summary>
+    public long LastFrameIndex { get; init; } = -1;
+}
 
 /// <summary>
 /// Splits a frame stream into laps and summarises each one. Deterministic: the same frames always
@@ -183,6 +196,8 @@ public sealed class LapTracker : IFrameObserver
         public double? StartTime { get; } = startTime;
         public bool Interrupted { get; set; }
         public int Frames { get; private set; }
+        long _first = -1;
+        long _last = -1;
         float? _min;
         float? _max;
         bool _pitRoad;
@@ -190,6 +205,9 @@ public sealed class LapTracker : IFrameObserver
         public void Add(TelemetryFrame frame)
         {
             Frames++;
+            if (_first < 0)
+                _first = frame.Index;
+            _last = frame.Index;
             if (frame.OnPitRoad == true)
                 _pitRoad = true;
             if (frame.Speed is { } speed && float.IsFinite(speed))
@@ -210,7 +228,12 @@ public sealed class LapTracker : IFrameObserver
                 _max,
                 Frames,
                 complete,
-                _pitRoad);
+                _pitRoad)
+            {
+                StartTime = StartTime,
+                FirstFrameIndex = _first,
+                LastFrameIndex = _last,
+            };
         }
     }
 }

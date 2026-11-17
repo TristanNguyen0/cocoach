@@ -40,6 +40,9 @@ public sealed record TelemetryFrame
     /// <summary>iRacing's last lap time, seconds. Non-positive when there is no valid last lap.</summary>
     public float? LapLastLapTime { get; init; }
 
+    /// <summary>iRacing's best lap time in this session so far, seconds. Non-positive when there is none.</summary>
+    public float? LapBestLapTime { get; init; }
+
     /// <summary>Ground speed, metres per second.</summary>
     public float? Speed { get; init; }
 
@@ -66,4 +69,34 @@ public sealed record TelemetryFrame
 
     /// <summary><c>irsdk_TrkSurf</c> material under the player car (Rumble1-4 are kerbs).</summary>
     public int? PlayerTrackSurfaceMaterial { get; init; }
+
+    /// <summary>Yaw rate, radians per second (positive turns left).</summary>
+    public float? YawRate { get; init; }
+
+    /// <summary>Lateral acceleration, metres per second squared (includes gravity).</summary>
+    public float? LatAccel { get; init; }
+
+    /// <summary>Longitudinal acceleration, metres per second squared (includes gravity).</summary>
+    public float? LongAccel { get; init; }
+
+    /// <summary>Latitude, degrees. Recorded in .ibt files only; reads as zero or absent on the live feed.</summary>
+    public double? Lat { get; init; }
+
+    /// <summary>Longitude, degrees. Recorded in .ibt files only; reads as zero or absent on the live feed.</summary>
+    public double? Lon { get; init; }
+
+    /// <summary>Altitude, metres. Recorded in .ibt files only.</summary>
+    public float? Alt { get; init; }
+
+    /// <summary>iRacing's delta to the session best lap, seconds (positive = slower).</summary>
+    public float? LapDeltaToBestLap { get; init; }
+
+    /// <summary>True when <see cref="LapDeltaToBestLap"/> is valid.</summary>
+    public bool? LapDeltaToBestLapOk { get; init; }
+
+    /// <summary>iRacing's delta to its optimal (best-sectors) lap, seconds.</summary>
+    public float? LapDeltaToOptimalLap { get; init; }
+
+    /// <summary>True when <see cref="LapDeltaToOptimalLap"/> is valid.</summary>
+    public bool? LapDeltaToOptimalLapOk { get; init; }
 }

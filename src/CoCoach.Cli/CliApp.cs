@@ -10,11 +10,14 @@ internal static class CliApp
     public const int Usage = 2;
 
     const string Help = """
-        cocoach - AI driving coach for iRacing (Phase 0 tools)
+        cocoach - AI driving coach for iRacing
 
         Usage:
           cocoach inspect <file.ibt> [--json]   Header facts, track and car, and the variable checklist
           cocoach replay <file.ibt>             Replay a recording through the pipeline; per-lap summary
+          cocoach analyze <file.ibt>...         Corners, per-lap per-corner metrics, top time-loss corners
+              --reference best|optimal          Compare against the best lap (default) or the optimal composite
+              --json                            Print the analysis as JSON
           cocoach live [--no-record]            Per-lap summary from the live sim, auto-recording .ibt (Windows)
           cocoach latency [options]             Telemetry-arrival-to-audio-start latency (Windows)
               --count <n>                       Stop after n clicks (default 20)
@@ -50,6 +53,7 @@ internal static class CliApp
             return args[0] switch
             {
                 "inspect" => InspectCommand.Run(rest, output, error),
+                "analyze" => await AnalyzeCommand.RunAsync(rest, output, error, cts.Token).ConfigureAwait(false),
                 "replay" => await ReplayCommand.RunAsync(rest, output, error, cts.Token).ConfigureAwait(false),
                 "live" => await LiveCommand.RunAsync(rest, output, error, cts.Token).ConfigureAwait(false),
                 "latency" => await LatencyCommand.RunAsync(rest, output, error, cts.Token).ConfigureAwait(false),
