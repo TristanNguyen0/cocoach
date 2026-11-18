@@ -68,7 +68,7 @@ Other drivers' names and custids are never printed: only the track and the playe
 5. **Per-corner metrics** against the reference:
    - brake-point offset (+ = braked earlier), peak brake, release rate, and trail-brake distance;
    - entry, minimum and exit speed;
-   - apex (minimum-speed) offset and throttle-pickup and full-throttle offsets (+ = later);
+   - apex (minimum-speed) offset and throttle-pickup and full-throttle offsets (+ = later); the apex offset is n/a when the lap's or the reference's minimum speed sits at the edge of the corner window, as in a corner taken flat out;
    - time lost (+) or gained in the entry, mid and exit sub-segments;
    - metres on kerbs, when the recording has surface material;
    - the line offset at turn-in, apex and exit (+ = further inside), on GPS maps.

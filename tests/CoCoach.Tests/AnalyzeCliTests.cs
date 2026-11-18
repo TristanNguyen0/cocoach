@@ -1,5 +1,6 @@
 using System.Text.Json;
 using CoCoach.Analysis;
+using CoCoach.Analysis.Comparison;
 using CoCoach.Analysis.Corners;
 using CoCoach.Analysis.Recording;
 using CoCoach.Analysis.References;
@@ -128,6 +129,54 @@ public sealed class AnalyzeCliTests : IDisposable
         Assert.DoesNotContain("best corner segments from", output, StringComparison.Ordinal);
         Assert.Contains("top time-loss corners: none, no corners detected", output, StringComparison.Ordinal);
         Assert.DoesNotContain("median over", output, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void Apex_offset_is_not_available_when_the_minimum_speed_sits_at_the_corner_window_edge()
+    {
+        // the first lap accelerates all the way through corner 7, as if taken flat out, so its lowest speed
+        // in the corner is at the start of the window searched for the apex
+        var run = Circuit.Session(Styles);
+        var arc = Circuit.Arcs[6];
+        var corner = SessionAnalyzer.Analyze([SessionLoader.FromFrames("s.ibt", run.Frames, Circuit.Facts())]).Track.Corners
+            .Single(c => c.Apex >= arc.Start - 5 && c.Apex <= arc.End + 5);
+        var flat = SyntheticRun.LapNumber(0);
+        var frames = run.Frames.Select(f =>
+            f.Lap == flat && f.LapDist >= corner.Start - 20 && f.LapDist <= corner.End + 20
+                ? f with { Speed = (float)(40 + 0.05 * (f.LapDist - corner.Start)) }
+                : f);
+        var result = SessionAnalyzer.Analyze([SessionLoader.FromFrames("flat.ibt", frames, Circuit.Facts())]);
+
+        CornerComparison At(int driven) =>
+            result.LapAnalyses.Single(a => a.Trace.Id.Lap == SyntheticRun.LapNumber(driven)).Corners.Single(c => c.Corner.Number == corner.Number);
+        var flatLap = At(0);
+        var normalLap = At(1);
+        Assert.True(flatLap.Lap.ApexAtWindowEdge);
+        Assert.False(flatLap.Reference.ApexAtWindowEdge);
+        Assert.Null(flatLap.ApexOffset);
+        Assert.Null((flatLap with { Lap = flatLap.Reference, Reference = flatLap.Lap }).ApexOffset);
+        Assert.False(normalLap.Lap.ApexAtWindowEdge);
+        Assert.NotNull(normalLap.ApexOffset);
+
+        // text: the apex column reads n/a for the flat lap only
+        var lines = AnalyzeCommand.ToText(result).Split('\n');
+        string[] Row(int driven)
+        {
+            var first = Array.FindIndex(lines, l => l.StartsWith($"  L{SyntheticRun.LapNumber(driven)} ", StringComparison.Ordinal));
+            var row = lines.Skip(first).Take(result.Track.Corners.Count).Single(l => l.Contains($" {corner.Name} ", StringComparison.Ordinal));
+            var cells = row.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+            return cells[Array.IndexOf(cells, corner.Name)..];
+        }
+        Assert.Equal("n/a", Row(0)[9]);
+        Assert.Matches(@"^[+-]\d+$", Row(1)[9]);
+
+        // JSON: apexOffset is null for the flat lap (left out, like every unavailable value), a number for the others
+        using var doc = JsonDocument.Parse(AnalyzeCommand.ToJson(result));
+        JsonElement CornerJson(int driven) => doc.RootElement.GetProperty("laps").EnumerateArray()
+            .Single(l => l.GetProperty("lapNumber").GetInt32() == SyntheticRun.LapNumber(driven))
+            .GetProperty("corners").EnumerateArray().Single(c => c.GetProperty("corner").GetString() == corner.Name);
+        Assert.False(CornerJson(0).TryGetProperty("apexOffset", out _));
+        Assert.Equal(JsonValueKind.Number, CornerJson(1).GetProperty("apexOffset").ValueKind);
     }
 
     [Fact]

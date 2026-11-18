@@ -34,8 +34,8 @@ public sealed record CornerComparison
     public double MinSpeedDifference => Lap.MinSpeed - Reference.MinSpeed;
     public double ExitSpeedDifference => Lap.ExitSpeed - Reference.ExitSpeed;
 
-    /// <summary>Metres the lap's minimum-speed point is after (+) the reference's.</summary>
-    public double ApexOffset => Lap.ApexPoint - Reference.ApexPoint;
+    /// <summary>Metres the lap's minimum-speed point is after (+) the reference's; null when either lies at the corner window edge.</summary>
+    public double? ApexOffset => Lap.ApexAtWindowEdge || Reference.ApexAtWindowEdge ? null : Lap.ApexPoint - Reference.ApexPoint;
 
     /// <summary>Metres the lap picked up the throttle after (+) the reference.</summary>
     public double? ThrottlePickupOffset => Diff(Lap.ThrottlePickup, Reference.ThrottlePickup);

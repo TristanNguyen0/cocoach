@@ -38,6 +38,12 @@ public sealed record CornerKeyPoints
     /// <summary>Where speed is lowest in the corner (the apex as a driver feels it).</summary>
     public required double ApexPoint { get; init; }
 
+    /// <summary>
+    /// The minimum speed sits at an end of the window searched for it (taken flat out, or braking for the next corner),
+    /// so <see cref="ApexPoint"/> marks the window edge rather than an apex the driver chose.
+    /// </summary>
+    public bool ApexAtWindowEdge { get; init; }
+
     public required double MinSpeed { get; init; }
 
     /// <summary>Speed at the corner's geometric turn-in.</summary>
@@ -220,6 +226,7 @@ public static class CornerKeyPointFinder
             TrailBrakeDistance = trail,
             TurnInPoint = turnInPoint,
             ApexPoint = D(apex),
+            ApexAtWindowEdge = apex == apexFrom || apex == apexTo,
             MinSpeed = lap.Speed[apex],
             EntrySpeed = lap.Speed[turnIn],
             ExitSpeed = lap.Speed[end],

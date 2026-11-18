@@ -145,7 +145,7 @@ internal static class AnalyzeCommand
             foreach (var c in lap.Corners)
             {
                 var note = isReference ? "reference" : c.Lap.OffTrack ? "off track" : string.Empty;
-                Line($"{head}  {c.Corner.Name,-6} {Signed(c.TimeDelta, "0.00"),6}  {Signed(c.EntryDelta, "0.00"),6}  {Signed(c.MidDelta, "0.00"),6}  {Signed(c.ExitDelta, "0.00"),6}  {Opt(c.BrakePointOffset, "0"),7}  {Signed(c.EntrySpeedDifference * 3.6, "0.0"),8}  {Signed(c.MinSpeedDifference * 3.6, "0.0"),6}  {Signed(c.ExitSpeedDifference * 3.6, "0.0"),7}  {Signed(c.ApexOffset, "0"),6}  {Opt(c.ThrottlePickupOffset, "0"),8}  {Kerb(c.Lap.KerbMetres),6}  {Opt(c.ApexLineOffset, "0.0"),6}  {note}");
+                Line($"{head}  {c.Corner.Name,-6} {Signed(c.TimeDelta, "0.00"),6}  {Signed(c.EntryDelta, "0.00"),6}  {Signed(c.MidDelta, "0.00"),6}  {Signed(c.ExitDelta, "0.00"),6}  {Opt(c.BrakePointOffset, "0"),7}  {Signed(c.EntrySpeedDifference * 3.6, "0.0"),8}  {Signed(c.MinSpeedDifference * 3.6, "0.0"),6}  {Signed(c.ExitSpeedDifference * 3.6, "0.0"),7}  {(c.ApexOffset is { } apex ? Signed(apex, "0") : "n/a"),6}  {Opt(c.ThrottlePickupOffset, "0"),8}  {Kerb(c.Lap.KerbMetres),6}  {Opt(c.ApexLineOffset, "0.0"),6}  {note}");
                 head = new string(' ', 2 + 6 + 1 + 9 + 2 + 8);
             }
             if (!lap.Trace.IsValid)
@@ -296,7 +296,7 @@ internal static class AnalyzeCommand
                     entrySpeedDifference = R(c.EntrySpeedDifference, 2),
                     minSpeedDifference = R(c.MinSpeedDifference, 2),
                     exitSpeedDifference = R(c.ExitSpeedDifference, 2),
-                    apexOffset = R(c.ApexOffset, 1),
+                    apexOffset = RO(c.ApexOffset, 1),
                     throttlePickupOffset = RO(c.ThrottlePickupOffset, 1),
                     fullThrottleOffset = RO(c.FullThrottleOffset, 1),
                     apexLineOffset = RO(c.ApexLineOffset, 2),
