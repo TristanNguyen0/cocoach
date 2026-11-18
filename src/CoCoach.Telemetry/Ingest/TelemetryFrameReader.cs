@@ -23,6 +23,7 @@ public static class TelemetryFrameReader
             LapDistPct = AsFloat(lookup(TelemetryVars.LapDistPct)),
             LapCurrentLapTime = AsFloat(lookup(TelemetryVars.LapCurrentLapTime)),
             LapLastLapTime = AsFloat(lookup(TelemetryVars.LapLastLapTime)),
+            LapBestLapTime = AsFloat(lookup(TelemetryVars.LapBestLapTime)),
             Speed = AsFloat(lookup(TelemetryVars.Speed)),
             Throttle = AsFloat(lookup(TelemetryVars.Throttle)),
             Brake = AsFloat(lookup(TelemetryVars.Brake)),
@@ -32,6 +33,14 @@ public static class TelemetryFrameReader
             OnPitRoad = AsBool(lookup(TelemetryVars.OnPitRoad)),
             PlayerTrackSurface = AsInt(lookup(TelemetryVars.PlayerTrackSurface)),
             PlayerTrackSurfaceMaterial = AsInt(lookup(TelemetryVars.PlayerTrackSurfaceMaterial)),
+            YawRate = AsFloat(lookup(TelemetryVars.YawRate)),
+            Lat = AsDouble(lookup(TelemetryVars.Lat)),
+            Lon = AsDouble(lookup(TelemetryVars.Lon)),
+            Alt = AsFloat(lookup(TelemetryVars.Alt)),
+            LapDeltaToBestLap = AsFloat(lookup(TelemetryVars.LapDeltaToBestLap)),
+            LapDeltaToBestLapOk = AsBool(lookup(TelemetryVars.LapDeltaToBestLapOk)),
+            LapDeltaToOptimalLap = AsFloat(lookup(TelemetryVars.LapDeltaToOptimalLap)),
+            LapDeltaToOptimalLapOk = AsBool(lookup(TelemetryVars.LapDeltaToOptimalLapOk)),
         };
     }
 
