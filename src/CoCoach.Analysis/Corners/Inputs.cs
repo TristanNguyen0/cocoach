@@ -29,12 +29,13 @@ internal static class Inputs
     /// <summary>
     /// The brake application that is under way at <paramref name="to"/>, or the last one that started before it,
     /// searching from <paramref name="from"/>. Runs separated by no more than <paramref name="mergeGap"/> samples
-    /// count as one application, and applications peaking below <see cref="MinPeakShare"/> of the strongest one
-    /// are skipped. An application already under way at <paramref name="from"/> is followed back to its true
-    /// onset, but no further than <paramref name="earliest"/>.
+    /// count as one application, and applications peaking below <paramref name="minPeakShare"/> of the strongest one
+    /// are skipped (0 keeps every application, dabs included). An application already under way at
+    /// <paramref name="from"/> is followed back to its true onset, but no further than <paramref name="earliest"/>.
     /// </summary>
     /// <returns>Onset and release indices (release is the first sample back below <see cref="BrakeOn"/>), or null.</returns>
-    public static (int Onset, int Release)? BrakeApplication(LapTrace lap, int from, int to, int mergeGap, int earliest = 0)
+    public static (int Onset, int Release)? BrakeApplication(
+        LapTrace lap, int from, int to, int mergeGap, int earliest = 0, double minPeakShare = MinPeakShare)
     {
         if (lap.Brake is not { } brake)
             return null;
@@ -56,7 +57,7 @@ internal static class Inputs
         if (runs.Count == 0)
             return null;
         var strongest = runs.Max(r => r.Peak);
-        var (onset, lastOn, _) = runs.FindLast(r => r.Peak >= MinPeakShare * strongest);
+        var (onset, lastOn, _) = runs.FindLast(r => r.Peak >= minPeakShare * strongest);
 
         // braking that began before the search window (in the previous corner of a chicane)
         if (onset == from)

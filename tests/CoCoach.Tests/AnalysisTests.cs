@@ -292,9 +292,10 @@ public sealed class AnalysisTests
     }
 
     [Fact]
-    public void A_light_brake_dab_after_the_braking_is_not_the_brake_point()
+    public void A_light_brake_dab_is_not_the_brake_point_but_still_comes_before_the_throttle_pickup()
     {
-        // the third lap comes off the brakes 50 m before corner 4, then dabs them at 8 % just before turn-in
+        // the third lap comes off the brakes 50 m before corner 4, holds 25 % throttle for 15 m, lifts,
+        // then dabs the brakes at 8 % just before turn-in and picks up the throttle in the arc as usual
         var run = Circuit.Session([LapStyle.Clean, LapStyle.Clean, LapStyle.Clean]);
         var arc = Circuit.Arcs[3];
         var dabbed = SyntheticRun.LapNumber(2);
@@ -302,8 +303,9 @@ public sealed class AnalysisTests
         {
             if (f.Lap != dabbed || f.LapDist < arc.Start - 50 || f.LapDist >= arc.Start)
                 return f;
+            var partial = f.LapDist >= arc.Start - 45 && f.LapDist < arc.Start - 30;
             var dab = f.LapDist >= arc.Start - 15 && f.LapDist < arc.Start - 8;
-            return f with { Brake = dab ? 0.08f : 0 };
+            return f with { Brake = dab ? 0.08f : 0, Throttle = partial ? 0.25f : 0 };
         });
         var r = SessionAnalyzer.Analyze([SessionLoader.FromFrames("dab.ibt", frames, Circuit.Facts())]);
 
@@ -311,6 +313,8 @@ public sealed class AnalysisTests
         Assert.Equal(run.Laps[2].BrakeStart[arc.Number]!.Value, points.BrakePoint!.Value, 2.0);
         Assert.Equal(0.8, points.PeakBrake!.Value, 0.01);
         Assert.InRange(points.BrakeRelease!.Value, arc.Start - 53, arc.Start - 47);
+        Assert.NotNull(points.ThrottlePickup);
+        Assert.InRange(points.ThrottlePickup.Value, arc.Start - 3, arc.Start + 3);
     }
 
     [Fact]

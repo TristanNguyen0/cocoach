@@ -110,11 +110,10 @@ public static class CornerKeyPointFinder
 
         // braking
         double? brakePoint = null, peak = null, peakAt = null, release = null, releaseRate = null, trail = null;
-        var releaseIndex = -1;
         if (Inputs.BrakeApplication(lap, searchFrom, apexGeo, M(Inputs.BrakeMergeGap), earliest) is { } application && lap.Brake is { } brake)
         {
             brakePoint = D(application.Onset);
-            releaseIndex = application.Release;
+            var releaseIndex = application.Release;
             release = D(releaseIndex);
             var peakIndex = application.Onset;
             for (var i = application.Onset; i < releaseIndex; i++)
@@ -171,11 +170,12 @@ public static class CornerKeyPointFinder
                 apex = i;
         }
 
-        // throttle: a pickup only exists after a lift
+        // throttle: a pickup only exists after a lift, and after the last touch of the brakes before the apex
         double? pickup = null, full = null;
         if (lap.Throttle is { } throttle && Inputs.FirstBelow(throttle, searchFrom, apex, Inputs.ThrottlePickup) is { } lift)
         {
-            var from = Math.Max(lift, releaseIndex);
+            var lastBrake = Inputs.BrakeApplication(lap, searchFrom, apexGeo, M(Inputs.BrakeMergeGap), earliest, minPeakShare: 0);
+            var from = Math.Max(lift, lastBrake?.Release ?? -1);
             if (Inputs.FirstSustained(throttle, from, searchTo, Inputs.ThrottlePickup, M(10)) is { } p)
             {
                 pickup = D(p);
