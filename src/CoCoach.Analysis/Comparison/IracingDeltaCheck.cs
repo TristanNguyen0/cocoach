@@ -38,7 +38,7 @@ public static class IracingDeltaCheck
     public const double EdgeSkip = 5;
 
     /// <summary>How far iRacing's delta at the line may be from its own lap-time difference, seconds.</summary>
-    public const double SelfConsistencyTolerance = 0.05;
+    public const double SelfConsistencyTolerance = 0.01;
 
     /// <summary>How close a lap time must be to iRacing's best lap time to be that lap, seconds.</summary>
     public const double LapTimeMatch = 0.005;

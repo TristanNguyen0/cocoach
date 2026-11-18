@@ -12,17 +12,8 @@ namespace CoCoach.Tests;
 /// </summary>
 public sealed class RealRecordingAnalysisTests
 {
-    /// <summary>
-    /// Our delta must match iRacing's <c>LapDeltaToBestLap</c> to within this, seconds, on at least
-    /// <see cref="DeltaAgreementShare"/> of the laps where iRacing's channel is self-consistent at the line.
-    /// </summary>
+    /// <summary>Our delta must match iRacing's <c>LapDeltaToBestLap</c> to within this, seconds, wherever iRacing's channel is self-consistent.</summary>
     const double DeltaTolerance = 0.010;
-
-    /// <summary>
-    /// iRacing's channel can drift mid-lap and still agree at the line: on the Tsukuba sample, lap 4 against lap 3
-    /// (the first best lap after a pit stop) wanders by up to 0.2 s while every other lap agrees within 2 ms.
-    /// </summary>
-    const double DeltaAgreementShare = 0.9;
 
     /// <summary>Recordings need this many valid complete laps to say anything about segmentation and references.</summary>
     const int MinValidLaps = 3;
@@ -141,20 +132,19 @@ public sealed class RealRecordingAnalysisTests
     [Fact]
     public async Task Delta_agrees_with_iRacings_LapDeltaToBestLap()
     {
-        // laps where iRacing's own delta at the line disagrees with its own lap times say nothing about ours
-        var checks = (await AnalysedOrSkip())
-            .SelectMany(a => a.Result.IracingDeltaChecks.Where(c => c.IracingSelfConsistent).Select(c => (a.File, Check: c)))
-            .ToArray();
-        if (checks.Length == 0)
+        var compared = 0;
+        foreach (var (file, r) in await AnalysedOrSkip())
+        {
+            // laps where iRacing's own delta at the line disagrees with its own lap times say nothing about ours
+            foreach (var check in r.IracingDeltaChecks.Where(c => c.IracingSelfConsistent))
+            {
+                Assert.True(check.MaxAbsError <= DeltaTolerance,
+                    $"{file} {check.Lap} against {check.Reference}: max |ours - iRacing| {check.MaxAbsError:0.0000} s over {check.Samples} points");
+                compared++;
+            }
+        }
+        if (compared == 0)
             Assert.Skip("No recording has a self-consistent LapDeltaToBestLap against a lap inside the recording.");
-
-        var outside = checks.Where(c => c.Check.MaxAbsError > DeltaTolerance).ToArray();
-        var report = string.Join("; ", outside.Select(c =>
-            $"{c.File} {c.Check.Lap} against {c.Check.Reference}: max |ours - iRacing| {c.Check.MaxAbsError:0.0000} s"));
-        Assert.True(checks.Length - outside.Length >= DeltaAgreementShare * checks.Length,
-            $"{outside.Length} of {checks.Length} laps outside {DeltaTolerance} s: {report}");
-        var maxima = checks.Select(c => c.Check.MaxAbsError).Order().ToArray();
-        Assert.True(maxima[maxima.Length / 2] <= DeltaTolerance, $"median lap's max error {maxima[maxima.Length / 2]:0.0000} s");
     }
 
     [Fact]

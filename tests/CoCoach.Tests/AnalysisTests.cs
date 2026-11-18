@@ -292,6 +292,28 @@ public sealed class AnalysisTests
     }
 
     [Fact]
+    public void A_light_brake_dab_after_the_braking_is_not_the_brake_point()
+    {
+        // the third lap comes off the brakes 50 m before corner 4, then dabs them at 8 % just before turn-in
+        var run = Circuit.Session([LapStyle.Clean, LapStyle.Clean, LapStyle.Clean]);
+        var arc = Circuit.Arcs[3];
+        var dabbed = SyntheticRun.LapNumber(2);
+        var frames = run.Frames.Select(f =>
+        {
+            if (f.Lap != dabbed || f.LapDist < arc.Start - 50 || f.LapDist >= arc.Start)
+                return f;
+            var dab = f.LapDist >= arc.Start - 15 && f.LapDist < arc.Start - 8;
+            return f with { Brake = dab ? 0.08f : 0 };
+        });
+        var r = SessionAnalyzer.Analyze([SessionLoader.FromFrames("dab.ibt", frames, Circuit.Facts())]);
+
+        var points = r.LapAnalyses.Single(a => a.Trace.Id.Lap == dabbed).Corners.Single(c => c.Corner.Number == arc.Number).Lap;
+        Assert.Equal(run.Laps[2].BrakeStart[arc.Number]!.Value, points.BrakePoint!.Value, 2.0);
+        Assert.Equal(0.8, points.PeakBrake!.Value, 0.01);
+        Assert.InRange(points.BrakeRelease!.Value, arc.Start - 53, arc.Start - 47);
+    }
+
+    [Fact]
     public void Optimal_composite_takes_the_best_segment_from_each_lap()
     {
         // one lap fast in corner 3, another fast in corner 4: the composite beats both
@@ -335,6 +357,19 @@ public sealed class AnalysisTests
             Assert.True(check.IracingSelfConsistent);
             Assert.True(check.MaxAbsError < 0.002, $"{check.Lap}: {check.MaxAbsError}");
         }
+    }
+
+    [Fact]
+    public void An_iracing_delta_30_ms_off_its_own_lap_times_is_not_self_consistent()
+    {
+        var run = Circuit.Session([LapStyle.Clean, LapStyle.Clean, LapStyle.Clean]);
+        var drifting = SyntheticRun.LapNumber(2);
+        var frames = run.Frames.Select(f =>
+            f.Lap == drifting && f.LapDeltaToBestLapOk == true ? f with { LapDeltaToBestLap = f.LapDeltaToBestLap + 0.03f } : f);
+        var checks = SessionAnalyzer.Analyze([SessionLoader.FromFrames("drift.ibt", frames, Circuit.Facts())]).IracingDeltaChecks;
+
+        Assert.True(checks.Single(c => c.Lap.Lap == SyntheticRun.LapNumber(1)).IracingSelfConsistent);
+        Assert.False(checks.Single(c => c.Lap.Lap == drifting).IracingSelfConsistent);
     }
 
     [Fact]
